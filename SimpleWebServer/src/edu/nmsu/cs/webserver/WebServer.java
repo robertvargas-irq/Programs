@@ -21,7 +21,7 @@ public class WebServer
 {
 	private ServerSocket	socket;
 
-	private boolean				running;
+	private boolean			running;
 
 	/**
 	 * Constructor
@@ -103,10 +103,10 @@ public class WebServer
 			}
 		}
 		WebServer server = new WebServer();
-		if (!server.start(port))
-		{
+		if (!server.start(port)) {
 			System.err.println("Execution failed!");
 		}
+		
 	} // end main
 
 } // end class
