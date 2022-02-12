@@ -21,14 +21,26 @@ package edu.nmsu.cs.webserver;
  *
  **/
 
+ /**
+  * Modified the Web Worker to process GET requests, and return the proper
+  * HTTP response code on fulfill. If file is not found, a 404 Not Found
+  * error will return, and return the proper HTML message to communicate the
+  * error as well.
+  * 
+  * @author Robert Vargas
+  */
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.Scanner;
 
 public class WebWorker implements Runnable
 {
@@ -47,22 +59,27 @@ public class WebWorker implements Runnable
 	 * Worker thread starting point. Each worker handles just one HTTP request and then returns, which
 	 * destroys the thread. This method assumes that whoever created the worker created it with a
 	 * valid open socket object.
+	 * @precondition Valid open socket object
+	 * @postcondition Web worker handled the incoming connection and returned the proper HTTP header
+	 * and HTML page.
 	 **/
-	public void run()
-	{
+	public void run() {
 		System.err.println("Handling connection...");
-		try
-		{
+		try {
+			// create IO stream
 			InputStream is = socket.getInputStream();
 			OutputStream os = socket.getOutputStream();
-			readHTTPRequest(is);
-			writeHTTPHeader(os, "text/html");
-			writeContent(os);
+
+			// parse HTTP request and map data to HTTP header and HTML content response
+			String[] responseData = readHTTPRequest(is, os);
+			String responseCode = responseData[0];
+			String responseContent = responseData[1];
+			writeHTTPHeader(os, "text/html", responseCode);
+			writeContent(os, responseContent);
 			os.flush();
 			socket.close();
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			System.err.println("Output error: " + e);
 		}
 		System.err.println("Done handling connection.");
@@ -70,51 +87,110 @@ public class WebWorker implements Runnable
 	}
 
 	/**
-	 * Read the HTTP request header.
+	 * Locate and return requested file along with the proper HTTP Response Code;
+	 * if no file was located, 404 and return the appropriate error content.
+	 * @param request Given GET request path to a certain file.
+	 * @param os Valid output stream.
+	 * @return String array with a HTTP Response Code and HTML Content from a requested file.
+	 */
+	private String[] processHTTPGetRequest(String request, OutputStream os) {
+		// process GET request
+		File requested;
+		String parsedName;
+		try {
+			// parse requested file; index.html if request is empty
+			parsedName = request.split(" ")[1].substring(1);
+			if (parsedName.equals(""))
+				parsedName = "index.html";
+			requested = new File(parsedName);
+			System.err.println("FILE: " + parsedName);
+			if (!requested.exists()) {
+
+				// return error header
+				System.err.println("UNABLE TO LOCATE REQUESTED FILE: " + requested.getName());
+				return new String[]{
+					"404 Not Found",
+					"<html><head></head><body>Unable to locate the requested file: " + requested.getName() + "</body></html>"
+				};
+
+			}
+			
+			// write file to content, and return 200 OK and content
+			Scanner fileReader = new Scanner(requested);
+			String responseContent = "";
+			while(fileReader.hasNextLine())
+				responseContent += fileReader.nextLine();
+			fileReader.close();
+			return new String[]{"200 OK", responseContent};
+
+		}
+		// handle IOException via Internal Server Error
+		catch (IOException e) {
+			return new String[]{
+				"500 Internal Server Error",
+				"<html><head></head>\n<body>Internal server error, full error details provided below:\n" + 
+				e.toString() + "\n" +
+				e.getStackTrace() +
+				".</body></html>"
+			};
+		}
+	}
+
+	/**
+	 * Read the HTTP request header and process a given GET request within.
+	 * @return String[] with an HTTP Response Code and HTML Content respectively.
 	 **/
-	private void readHTTPRequest(InputStream is)
-	{
+	private String[] readHTTPRequest(InputStream is, OutputStream os) {
 		String line;
 		BufferedReader r = new BufferedReader(new InputStreamReader(is));
-		while (true)
-		{
-			try
-			{
+		while (true) {
+			try {
+				// instantiate reader and block until ready
 				while (!r.ready())
 					Thread.sleep(1);
+				
+				// read each line from the HTTP request and process each request accordingly
 				line = r.readLine();
 				System.err.println("Request line: (" + line + ")");
 				if (line.length() == 0)
 					break;
+				if (line.contains("GET"))
+					return processHTTPGetRequest(line, os);
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				System.err.println("Request error: " + e);
-				break;
+				return new String[]{
+					"400 Bad Request",
+					"<html><head></head><body>Unable to process incoming HTTP request, full error details provided below:\n" + 
+					e.toString() + "\n" +
+					e.getStackTrace() +
+					".</body></html>"
+				};
 			}
 		}
-		return;
+
+		// by default, return 200 OK with the index.html as the default entry-point
+		return new String[]{"200 OK", new File("index.html").toString()};
 	}
 
 	/**
 	 * Write the HTTP header lines to the client network connection.
-	 * 
-	 * @param os
-	 *          is the OutputStream object to write to
-	 * @param contentType
-	 *          is the string MIME content type (e.g. "text/html")
+	 * @param os The OutputStream object to write to
+	 * @param contentType The string MIME content type (e.g. "text/html")
+	 * @param HTTPResponseCode Final HTTP status code after processing the
+	 * full incoming HTTP request.
 	 **/
-	private void writeHTTPHeader(OutputStream os, String contentType) throws Exception
+	private void writeHTTPHeader(OutputStream os, String contentType, String HTTPResponseCode) throws Exception
 	{
 		Date d = new Date();
 		DateFormat df = DateFormat.getDateTimeInstance();
 		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		os.write("HTTP/1.1 200 OK\n".getBytes());
+		os.write(("HTTP/1.1 " + HTTPResponseCode + "\n").getBytes());
 		os.write("Date: ".getBytes());
 		os.write((df.format(d)).getBytes());
 		os.write("\n".getBytes());
-		os.write("Server: Jon's very own server\n".getBytes());
-		// os.write("Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n".getBytes());
+		os.write("Server: Robert's very own server\n".getBytes());
+		os.write(("Last-Modified: " + df.toString() + "\n").getBytes());
 		// os.write("Content-Length: 438\n".getBytes());
 		os.write("Connection: close\n".getBytes());
 		os.write("Content-Type: ".getBytes());
@@ -126,15 +202,22 @@ public class WebWorker implements Runnable
 	/**
 	 * Write the data content to the client network connection. This MUST be done after the HTTP
 	 * header has been written out.
-	 * 
-	 * @param os
-	 *          is the OutputStream object to write to
+	 * @param os Valid OutputStream object to write to.
+	 * @param HTMLContent HTML to write out to the server, fetched earlier
+	 * from readHTTPRequest.
 	 **/
-	private void writeContent(OutputStream os) throws Exception
+	private void writeContent(OutputStream os, String HTMLContent) throws Exception
 	{
-		os.write("<html><head></head><body>\n".getBytes());
-		os.write("<h3>My web server works!</h3>\n".getBytes());
-		os.write("</body></html>\n".getBytes());
+		// replace custom HTML tags
+		Date d = new Date();
+		DateFormat df = DateFormat.getDateTimeInstance();
+		df.setTimeZone(TimeZone.getTimeZone("MST"));
+		HTMLContent = HTMLContent
+			.replace("<cs371date>", df.format(d).toString())
+			.replace("<cs371server>", "Robert's Server");
+		
+		// write to output
+		os.write(HTMLContent.getBytes());
 	}
 
 } // end class
