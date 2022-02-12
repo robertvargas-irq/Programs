@@ -102,6 +102,13 @@ public class WebWorker implements Runnable
 			parsedName = request.split(" ")[1].substring(1);
 			if (parsedName.equals(""))
 				parsedName = "index.html";
+			
+			// prevent accessing of non-HTML files
+			if (!parsedName.endsWith(".html"))
+				return new String[]{
+					"400 Bad Request",
+					"The file you requested is not a valid HTML file. All requests must end in .html"
+				};
 			requested = new File(parsedName);
 			System.err.println("FILE: " + parsedName);
 			if (!requested.exists()) {
