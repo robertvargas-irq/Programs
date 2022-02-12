@@ -20,41 +20,34 @@ import java.net.Socket;
 public class WebServer
 {
 	private ServerSocket	socket;
-
 	private boolean			running;
 
 	/**
 	 * Constructor
 	 **/
-	private WebServer()
-	{
+	private WebServer() {
 		running = false;
 	}
 
 	/**
-	 * Web server starting point. This method does not return until the server is finished, so perhaps
-	 * it should be named "runServer" or something like that.
-	 * 
-	 * @param port
-	 *          is the TCP port number to accept connections on
+	 * Web server starting point. This method does not return until the server is finished.
+	 * @param port The TCP port number to accept connections on
 	 **/
-	private boolean start(int port)
+	private boolean runServer(int port)
 	{
 		Socket workerSocket;
 		WebWorker worker;
-		try
-		{
+		try {
 			socket = new ServerSocket(port);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			System.err.println("Error binding to port " + port + ": " + e);
 			return false;
 		}
-		while (true)
-		{
-			try
-			{
+
+		// accept incoming client connections
+		while (true) {
+			try {
 				// wait and listen for new client connection
 				workerSocket = socket.accept();
 			}
@@ -73,8 +66,7 @@ public class WebServer
 	/**
 	 * Does not do anything, since start() never returns.
 	 **/
-	private boolean stop()
-	{
+	private boolean stop() {
 		return true;
 	}
 
@@ -82,28 +74,27 @@ public class WebServer
 	 * Application main: process command line and start web server; default port number is 8080 if not
 	 * given on command line.
 	 **/
-	public static void main(String args[])
-	{
+	public static void main(String args[]) {
+
+		// handle possible port re-assignment from args
 		int port = 8080;
-		if (args.length > 1)
-		{
+		if (args.length > 1) {
 			System.err.println("Usage: java Webserver <portNumber>");
 			return;
 		}
-		else if (args.length == 1)
-		{
-			try
-			{
+		else if (args.length == 1) {
+			try {
 				port = Integer.parseInt(args[0]);
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				System.err.println("Argument must be an int (" + e + ")");
 				return;
 			}
 		}
+
+		// open web server at declared port
 		WebServer server = new WebServer();
-		if (!server.start(port)) {
+		if (!server.runServer(port)) {
 			System.err.println("Execution failed!");
 		}
 		
