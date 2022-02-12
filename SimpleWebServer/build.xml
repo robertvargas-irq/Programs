@@ -1,0 +1,39 @@
+<project name="WebServer" default="dist" basedir=".">
+    <description>
+        A simple webserver that returns a formatted HTML doc.
+    </description>
+    <!-- global properties -->
+    <property name="src" location="src/"/>
+    <property name="bin" location="bin/"/>
+    <property name="dist" location="dist/"/>
+
+    <target name="init">
+        <!-- create bin directory to store compiled .class files -->
+        <mkdir dir="${bin}"/>
+    </target>
+
+    <!-- compile the source code -->
+    <target name="compile" depends="init" description="Compile from ${src} into ${bin}/">
+        <javac srcdir="${src}" destdir="${bin}"/>
+    </target>
+
+    <target name="dist" depends="compile" description="Generate the distribution.">
+        <!-- create directory for dist -->
+        <mkdir dir="${dist}/lib"/>
+
+        <!-- generate JAR file from built binaries -->
+        <jar jarfile="${dist}/lib/SimpleWebServer.jar" basedir="${bin}"/>
+    </target>
+
+    <target name="clean" description="Clean up ${bin} and ${dist}">
+        <!-- delete the ${build} and ${dist} directory trees -->
+        <delete dir="${bin}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="run" depends="compile">
+        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true">
+            <arg value="8080"/>
+        </java>
+    </target>
+</project>
