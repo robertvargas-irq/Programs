@@ -41,6 +41,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Scanner;
+import java.util.List;
 
 public class WebWorker implements Runnable
 {
@@ -73,8 +74,11 @@ public class WebWorker implements Runnable
 			// parse HTTP request and map data to HTTP header and HTML content response
 			String[] responseData = readHTTPRequest(is, os);
 			String responseCode = responseData[0];
-			String responseContent = responseData[1];
-			writeHTTPHeader(os, "text/html", responseCode);
+			String responseType = responseData[1];
+			String responseContent = responseData[2];
+
+			// write header and content then close the stream
+			writeHTTPHeader(os, responseType, responseCode);
 			writeContent(os, responseContent);
 			os.flush();
 			socket.close();
@@ -103,11 +107,17 @@ public class WebWorker implements Runnable
 			if (parsedName.equals(""))
 				parsedName = "index.html";
 			
-			// prevent accessing of non-HTML files
-			if (!parsedName.endsWith(".html"))
+			// prevent accessing of non-supported files
+			List<String> permittedTypes = List.of(
+				"html", "gif", "jpeg", "png"
+			);
+			String fileType = parsedName.substring((parsedName.lastIndexOf(".") + 1));
+			if (!permittedTypes.contains(fileType))
 				return new String[]{
 					"400 Bad Request",
-					"The file you requested is not a valid HTML file. All requests must end in .html"
+					"text/html",
+					"<html><head></head><body>The file you requested is not a valid HTML file. All requests must end in one of the following: "
+					+ permittedTypes.toString() + "</body></html>"
 				};
 			requested = new File(parsedName);
 			System.err.println("FILE: " + parsedName);
@@ -117,6 +127,7 @@ public class WebWorker implements Runnable
 				System.err.println("UNABLE TO LOCATE REQUESTED FILE: " + requested.getName());
 				return new String[]{
 					"404 Not Found",
+					"text/html",
 					"<html><head></head><body>Unable to locate the requested file: " + requested.getName() + "</body></html>"
 				};
 
@@ -128,13 +139,14 @@ public class WebWorker implements Runnable
 			while(fileReader.hasNextLine())
 				responseContent += fileReader.nextLine();
 			fileReader.close();
-			return new String[]{"200 OK", responseContent};
+			return new String[]{"200 OK", "text/html", responseContent};
 
 		}
 		// handle IOException via Internal Server Error
 		catch (IOException e) {
 			return new String[]{
 				"500 Internal Server Error",
+				"text/html",
 				"<html><head></head>\n<body>Internal server error, full error details provided below:\n" + 
 				e.toString() + "\n" +
 				e.getStackTrace() +
@@ -168,6 +180,7 @@ public class WebWorker implements Runnable
 				System.err.println("Request error: " + e);
 				return new String[]{
 					"400 Bad Request",
+					"text/html",
 					"<html><head></head><body>Unable to process incoming HTTP request, full error details provided below:\n" + 
 					e.toString() + "\n" +
 					e.getStackTrace() +
@@ -177,7 +190,7 @@ public class WebWorker implements Runnable
 		}
 
 		// by default, return 200 OK with the index.html as the default entry-point
-		return new String[]{"200 OK", new File("index.html").toString()};
+		return new String[]{"200 OK", "text/html", new File("index.html").toString()};
 	}
 
 	/**
