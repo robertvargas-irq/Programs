@@ -109,21 +109,26 @@ public class WebWorker implements Runnable
 			parsedName = request.split(" ")[1].substring(1);
 			if (parsedName.equals(""))
 				parsedName = "index.html";
-			
+
 			// prevent accessing of non-supported files
 			List<String> permittedTypes = List.of(
 				"html", "gif", "jpeg", "png", "ico"
 			);
 			String fileType = parsedName.substring((parsedName.lastIndexOf(".") + 1));
-			if (!permittedTypes.contains(fileType))
+			if (!permittedTypes.contains(fileType)) {
 				return new Object[]{
 					"400 Bad Request",
 					"text/html",
 					("<html><head></head><body>The file you requested is not a valid HTML file. All requests must end in one of the following: "
 					+ permittedTypes.toString() + "</body></html>").getBytes()
-				};
+				}; // end return
+			} // end if
+
+			// define file and open
 			requested = new File(parsedName);
 			System.err.println("FILE: " + parsedName);
+
+			// ensure file exists
 			if (!requested.exists()) {
 
 				// return error header
