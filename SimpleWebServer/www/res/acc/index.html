@@ -14,6 +14,7 @@
             font-family: 'Courier New', Courier, monospace;
         }
     </style>
+    <link rel="icon" type="image/jpeg" href="/img/snowglobe.jpeg"/>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,12 +27,16 @@
     <hr>
     <p>Today's date is <cs371date></p>
     <p>You are currently visiting: <cs371server></p>
-    <img src="https://t4.ftcdn.net/jpg/01/17/28/51/360_F_117285131_W2qjuUEEBPP2nPJHxosDk62mj4B6KvIg.jpg" alt="Simple sun cartoon">
+    <img src="./img/cat.gif" alt="Cute cat gif cartoon">
+    <p><sub>This image is directly referenced in an HTML &ltimg&gt tag.</sub></p>
     <hr>
     <h3>The following HTML files are retrievable via GET request:</h3>
     <ul>
-        <li class="files">test.html</li>
-        <li class="files">rest/acc/test.html</li>
+        <li class="files"><a href="/test.html">test.html</a> Test HTML</li>
+        <li class="files"><a href="/jar/cookie.html">jar/cookie.html</a> Grab a cookie!</li>
+        <li class="files"><a href="/img/snowglobe.jpeg">img/snowglobe.jpeg</a> Gaze into the snowglobe!</li>
+        <li class="files"><a href="/img/rocketprototype.png">img/rocketprototype.png</a> Animatronic Prototype</li>
+        <li class="files"><a href="/img/cat.gif">img/cat.gif</a> Cat!</li>
     </ul>
 </body>
 </html>
