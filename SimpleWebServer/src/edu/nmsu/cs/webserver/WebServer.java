@@ -20,13 +20,13 @@ import java.net.Socket;
 public class WebServer
 {
 	private ServerSocket	socket;
-	private boolean			running;
+	// private boolean			running;
 
 	/**
 	 * Constructor
 	 **/
 	private WebServer() {
-		running = false;
+		// running = false;
 	}
 
 	/**
@@ -66,9 +66,9 @@ public class WebServer
 	/**
 	 * Does not do anything, since start() never returns.
 	 **/
-	private boolean stop() {
-		return true;
-	}
+	// private boolean stop() {
+	// 	return true;
+	// }
 
 	/**
 	 * Application main: process command line and start web server; default port number is 8080 if not
