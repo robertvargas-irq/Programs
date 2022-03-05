@@ -31,7 +31,7 @@
         <delete dir="${dist}"/>
     </target>
 
-    <target name="run" depends="compile">
+    <target name="run" depends="clean,compile">
         <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true" dir="www">
             <arg value="8080"/>
         </java>
