@@ -1,4 +1,4 @@
-<project name="WebServer" default="dist" basedir=".">
+<project name="WebServer" default="run" basedir=".">
     <description>
         A simple webserver that returns a formatted HTML doc.
     </description>
@@ -32,7 +32,7 @@
     </target>
 
     <target name="run" depends="compile">
-        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true">
+        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true" dir="www/res/acc">
             <arg value="8080"/>
         </java>
     </target>
