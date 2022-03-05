@@ -30,6 +30,9 @@ package edu.nmsu.cs.webserver;
   * @author Robert Vargas
   */
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,10 +75,10 @@ public class WebWorker implements Runnable
 			OutputStream os = socket.getOutputStream();
 
 			// parse HTTP request and map data to HTTP header and HTML content response
-			String[] responseData = readHTTPRequest(is, os);
-			String responseCode = responseData[0];
-			String responseType = responseData[1];
-			String responseContent = responseData[2];
+			Object[] responseData  = readHTTPRequest(is, os);
+			String responseCode    = (String)responseData[0];
+			String responseType    = (String)responseData[1];
+			byte[] responseContent = (byte[])responseData[2];
 
 			// write header and content then close the stream
 			writeHTTPHeader(os, responseType, responseCode);
@@ -97,7 +100,7 @@ public class WebWorker implements Runnable
 	 * @param os Valid output stream.
 	 * @return String array with a HTTP Response Code and HTML Content from a requested file.
 	 */
-	private String[] processHTTPGetRequest(String request, OutputStream os) {
+	private Object[] processHTTPGetRequest(String request, OutputStream os) {
 		// process GET request
 		File requested;
 		String parsedName;
@@ -109,15 +112,15 @@ public class WebWorker implements Runnable
 			
 			// prevent accessing of non-supported files
 			List<String> permittedTypes = List.of(
-				"html", "gif", "jpeg", "png"
+				"html", "gif", "jpeg", "png", "ico"
 			);
 			String fileType = parsedName.substring((parsedName.lastIndexOf(".") + 1));
 			if (!permittedTypes.contains(fileType))
-				return new String[]{
+				return new Object[]{
 					"400 Bad Request",
 					"text/html",
-					"<html><head></head><body>The file you requested is not a valid HTML file. All requests must end in one of the following: "
-					+ permittedTypes.toString() + "</body></html>"
+					("<html><head></head><body>The file you requested is not a valid HTML file. All requests must end in one of the following: "
+					+ permittedTypes.toString() + "</body></html>").getBytes()
 				};
 			requested = new File(parsedName);
 			System.err.println("FILE: " + parsedName);
@@ -125,32 +128,56 @@ public class WebWorker implements Runnable
 
 				// return error header
 				System.err.println("UNABLE TO LOCATE REQUESTED FILE: " + requested.getName());
-				return new String[]{
+				return new Object[]{
 					"404 Not Found",
 					"text/html",
-					"<html><head></head><body>Unable to locate the requested file: " + requested.getName() + "</body></html>"
+					("<html><head></head><body>Unable to locate the requested file: " + requested.getName() + "</body></html>").getBytes()
 				};
 
 			}
-			
-			// write file to content, and return 200 OK and content
-			Scanner fileReader = new Scanner(requested);
-			String responseContent = "";
-			while(fileReader.hasNextLine())
-				responseContent += fileReader.nextLine();
-			fileReader.close();
-			return new String[]{"200 OK", "text/html", responseContent};
+
+			// process the correct file type
+			switch (fileType){
+				case "html":
+					// write file to content, and return 200 OK and content
+					Scanner fileReader = new Scanner(requested);
+					String responseContent = "";
+					while(fileReader.hasNextLine())
+						responseContent += fileReader.nextLine();
+					fileReader.close();
+
+					// replace custom HTML tags
+					Date d = new Date();
+					DateFormat df = DateFormat.getDateTimeInstance();
+					df.setTimeZone(TimeZone.getTimeZone("MST"));
+					responseContent = responseContent
+						.replace("<cs371date>", df.format(d).toString())
+						.replace("<cs371server>", "Robert's Server");
+
+					return new Object[]{"200 OK", "text" + fileType, responseContent.getBytes()};
+				default: // currently only image files
+					// map file to BufferedImage
+					BufferedImage bi = ImageIO.read(requested);
+					
+					// convert to byte array
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ImageIO.write(bi, fileType, baos); // write from BufferedImage of fileType to BAOS
+					byte[] imageBytes = baos.toByteArray();
+
+					return new Object[]{"200 OK", "image" + fileType, imageBytes};
+
+			}
 
 		}
 		// handle IOException via Internal Server Error
 		catch (IOException e) {
-			return new String[]{
+			return new Object[]{
 				"500 Internal Server Error",
 				"text/html",
-				"<html><head></head>\n<body>Internal server error, full error details provided below:\n" + 
+				("<html><head></head>\n<body>Internal server error, full error details provided below:\n" + 
 				e.toString() + "\n" +
 				e.getStackTrace() +
-				".</body></html>"
+				".</body></html>").getBytes()
 			};
 		}
 	}
@@ -159,7 +186,7 @@ public class WebWorker implements Runnable
 	 * Read the HTTP request header and process a given GET request within.
 	 * @return String[] with an HTTP Response Code and HTML Content respectively.
 	 **/
-	private String[] readHTTPRequest(InputStream is, OutputStream os) {
+	private Object[] readHTTPRequest(InputStream is, OutputStream os) {
 		String line;
 		BufferedReader r = new BufferedReader(new InputStreamReader(is));
 		while (true) {
@@ -178,19 +205,19 @@ public class WebWorker implements Runnable
 			}
 			catch (Exception e) {
 				System.err.println("Request error: " + e);
-				return new String[]{
+				return new Object[]{
 					"400 Bad Request",
 					"text/html",
-					"<html><head></head><body>Unable to process incoming HTTP request, full error details provided below:\n" + 
+					("<html><head></head><body>Unable to process incoming HTTP request, full error details provided below:\n" + 
 					e.toString() + "\n" +
 					e.getStackTrace() +
-					".</body></html>"
+					".</body></html>").getBytes()
 				};
 			}
 		}
 
 		// by default, return 200 OK with the index.html as the default entry-point
-		return new String[]{"200 OK", "text/html", new File("index.html").toString()};
+		return new Object[]{"200 OK", "text/html", new File("index.html").toString().getBytes()};
 	}
 
 	/**
@@ -211,7 +238,6 @@ public class WebWorker implements Runnable
 		os.write("\n".getBytes());
 		os.write("Server: Robert's very own server\n".getBytes());
 		os.write(("Last-Modified: " + df.toString() + "\n").getBytes());
-		// os.write("Content-Length: 438\n".getBytes());
 		os.write("Connection: close\n".getBytes());
 		os.write("Content-Type: ".getBytes());
 		os.write(contentType.getBytes());
@@ -223,21 +249,13 @@ public class WebWorker implements Runnable
 	 * Write the data content to the client network connection. This MUST be done after the HTTP
 	 * header has been written out.
 	 * @param os Valid OutputStream object to write to.
-	 * @param HTMLContent HTML to write out to the server, fetched earlier
+	 * @param content HTML or image to write out to the server, fetched earlier
 	 * from readHTTPRequest.
 	 **/
-	private void writeContent(OutputStream os, String HTMLContent) throws Exception
-	{
-		// replace custom HTML tags
-		Date d = new Date();
-		DateFormat df = DateFormat.getDateTimeInstance();
-		df.setTimeZone(TimeZone.getTimeZone("MST"));
-		HTMLContent = HTMLContent
-			.replace("<cs371date>", df.format(d).toString())
-			.replace("<cs371server>", "Robert's Server");
-		
+	private void writeContent(OutputStream os, byte[] content) throws Exception
+	{	
 		// write to output
-		os.write(HTMLContent.getBytes());
+		os.write(content);
 	}
 
 } // end class
