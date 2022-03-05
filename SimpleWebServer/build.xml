@@ -32,7 +32,7 @@
     </target>
 
     <target name="run" depends="compile">
-        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true" dir="www/res/acc">
+        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true" dir="www">
             <arg value="8080"/>
         </java>
     </target>
