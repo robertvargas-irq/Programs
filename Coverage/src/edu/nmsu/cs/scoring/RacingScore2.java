@@ -42,20 +42,26 @@ public class RacingScore2
 			s1 = score2;
 			s2 = score3;
 		}
-		else if (score2 < score1 && score2 < score3)
-		{
-			s1 = score1;
-			s2 = score2;
-		}
-		else if (score3 < score1 && score3 < score2)
-		{
-			s1 = score1;
-			s2 = score2;
-		}
 		else
 		{
-			s1 = 99;
-			s2 = 99;
+			if (score2 < score1 && score2 < score3)
+			{
+				s1 = score1;
+				s2 = score2;
+			}
+			else
+			{
+				if (score3 < score1 && score3 < score2)
+				{
+					s1 = score1;
+					s2 = score2;
+				}
+				else
+				{
+					s1 = 99;
+					s2 = 99;
+				}
+			}
 		}
 		s = s1 + s2;
 		return s;
@@ -64,7 +70,7 @@ public class RacingScore2
 	public static void main(String args[])
 	{
 		int s1, s2, s3;
-		if (args == null || args.length != 3)
+		if (args.length != 3) /* README: ARGS WILL NEVER BE NULL */
 		{
 			System.err.println("Error: must supply three arguments!");
 			return;
