@@ -70,7 +70,7 @@ public class RacingScore2
 	public static void main(String args[])
 	{
 		int s1, s2, s3;
-		if (args.length != 3) /* README: ARGS WILL NEVER BE NULL */
+		if (args.length != 3) /* FIXED: REMOVED NULL CHECK AS ARGS CAN NEVER BE NULL */
 		{
 			System.err.println("Error: must supply three arguments!");
 			return;
