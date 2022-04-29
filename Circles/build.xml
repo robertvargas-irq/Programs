@@ -1,0 +1,57 @@
+<project name="circles" default="test" basedir=".">
+    <description>
+        Hands-on experimenting with jUnit with a simple Circle file.
+    </description>
+    <property name="src.dir" location="src/"/>
+    <property name="bin.dir" location="bin/"/>
+    <property name="lib.dir" location="lib/"/>
+    <property name="rep.dir" location="rep/"/>
+
+    <!-- Create bin directory -->
+    <target name="init" description="Initialize required directories">
+        <mkdir dir="${bin.dir}"/>
+        <mkdir dir="${rep.dir}"/>
+    </target>
+
+    <!-- Compile the program to the bin -->
+    <target name="compile" depends="init">
+        <echo message="Compiling source code into: ${bin.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" debug="true">
+            <classpath>
+                <pathelement path="lib/junit.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+
+    <!-- Test both circles -->
+    <target name="test" depends="testCircle1,testCircle2">
+
+    </target>
+
+    <!-- Run tests for Circle1 -->
+    <target name="testCircle1" depends="clean,compile">
+        <junit jvm="false">
+            <classpath>
+                <pathelement path="lib/junit.jar"/>
+            </classpath>
+            <formatter type="plain"/>
+            <test
+                name="Circle1Test"
+                todir="${rep.dir}"
+            />
+        </junit>
+    </target>
+
+    <!-- Run tests for Circle2 -->
+    <target name="testCircle2" depends="clean,compile">
+        
+    </target>
+
+    <!-- Clean out the bin directory -->
+    <target name="clean">
+        <delete dir="${bin.dir}"/>
+        <delete dir="${rep.dir}"/>
+    </target>
+
+</project>
