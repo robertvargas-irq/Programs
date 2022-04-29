@@ -58,7 +58,7 @@
             <formatter type="plain"/>
             <batchtest todir="${rep.dir}">
                 <fileset dir="${src.dir}">
-                    <include name="**/Circle1Test.java"/>
+                    <include name="**/Circle2Test.java"/>
                 </fileset>
             </batchtest>
         </junit>
