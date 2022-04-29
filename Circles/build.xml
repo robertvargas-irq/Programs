@@ -1,4 +1,4 @@
-<project name="circles" default="test" basedir=".">
+<project name="circles" default="test" basedir="." xmlns="antlib:org.apache.tools.ant">
     <description>
         Hands-on experimenting with jUnit with a simple Circle file.
     </description>
@@ -18,7 +18,9 @@
         <echo message="Compiling source code into: ${bin.dir}"/>
 		<javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false" debug="true">
             <classpath>
-                <pathelement path="lib/junit.jar"/>
+                <pathelement path="${bin.dir}"/>
+                <pathelement location="lib/junit.jar"/>
+                <pathelement location="lib/hamcrest-core-1.3.jar"/>
             </classpath>
         </javac>
     </target>
@@ -26,26 +28,40 @@
 
     <!-- Test both circles -->
     <target name="test" depends="testCircle1,testCircle2">
-
     </target>
 
     <!-- Run tests for Circle1 -->
     <target name="testCircle1" depends="clean,compile">
-        <junit jvm="false">
+        <junit printsummary="yes" fork="yes">
             <classpath>
-                <pathelement path="lib/junit.jar"/>
+                <pathelement path="${bin.dir}"/>
+                <pathelement location="lib/junit.jar"/>
+                <pathelement location="lib/hamcrest-core-1.3.jar"/>
             </classpath>
             <formatter type="plain"/>
-            <test
-                name="Circle1Test"
-                todir="${rep.dir}"
-            />
+            <batchtest todir="${rep.dir}">
+                <fileset dir="${src.dir}">
+                    <include name="**/Circle1Test.java"/>
+                </fileset>
+            </batchtest>
         </junit>
     </target>
 
     <!-- Run tests for Circle2 -->
     <target name="testCircle2" depends="clean,compile">
-        
+        <junit printsummary="yes" fork="yes">
+            <classpath>
+                <pathelement path="${bin.dir}"/>
+                <pathelement location="lib/junit.jar"/>
+                <pathelement location="lib/hamcrest-core-1.3.jar"/>
+            </classpath>
+            <formatter type="plain"/>
+            <batchtest todir="${rep.dir}">
+                <fileset dir="${src.dir}">
+                    <include name="**/Circle1Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
 
     <!-- Clean out the bin directory -->
