@@ -98,7 +98,7 @@ public class WebWorker implements Runnable
 	 * if no file was located, 404 and return the appropriate error content.
 	 * @param request Given GET request path to a certain file.
 	 * @param os Valid output stream.
-	 * @return String array with a HTTP Response Code and HTML Content from a requested file.
+	 * @return Object array with a (String) HTTP Response Code, (String) HTML Content Type, and (byte[]) Content bytes from the requested file.
 	 */
 	private Object[] processHTTPGetRequest(String request, OutputStream os) {
 		// process GET request
@@ -189,7 +189,7 @@ public class WebWorker implements Runnable
 
 	/**
 	 * Read the HTTP request header and process a given GET request within.
-	 * @return String[] with an HTTP Response Code and HTML Content respectively.
+	 * @return Object array with a (String) HTTP Response Code, (String) HTML Content Type, and (byte[]) Content bytes from the requested file.
 	 **/
 	private Object[] readHTTPRequest(InputStream is, OutputStream os) {
 		String line;
