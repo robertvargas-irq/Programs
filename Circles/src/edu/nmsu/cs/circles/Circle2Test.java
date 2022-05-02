@@ -33,6 +33,8 @@ public class Circle2Test {
 		Point p;
 		System.out.println("Running test simpleMove.");
 		p = circle2.moveBy(1, 1);
+		System.out.println("p.x: " + p.x);
+		System.out.println("p.y: " + p.y);
 		Assert.assertTrue(p.x == 2 && p.y == 3);
 	}
 
