@@ -50,6 +50,21 @@ public class Circle2Test {
 		Assert.assertTrue(p.x == 0 && p.y == 1);
 	}
 
+	//
+	// Test an intersection of two circles
+	//
+	@Test
+	public void intersectTwo()
+	{
+		Circle2 secondCircle = new Circle2(-1, -1, 3);
+		boolean intersects;
+
+		System.out.println("Running test intersectTwo.");
+		intersects = circle2.intersects(secondCircle);
+
+		Assert.assertTrue(intersects == true);
+	}
+
 	/***
 	 * NOT USED public static void main(String args[]) { try { org.junit.runner.JUnitCore.runClasses(
 	 * java.lang.Class.forName("Circle2Test")); } catch (Exception e) { System.out.println("Exception:

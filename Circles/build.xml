@@ -46,7 +46,7 @@
             </batchtest>
         </junit>
     </target>
-
+    
     <!-- Run tests for Circle2 -->
     <target name="testCircle2" depends="clean,compile">
         <junit printsummary="yes" fork="yes">
