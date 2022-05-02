@@ -59,6 +59,51 @@ public class Circle1Test
 		Assert.assertTrue(p.x == 0 && p.y == 1);
 	}
 
+	//
+	// Test an intersection of two circles
+	//
+	@Test
+	public void intersectTwo()
+	{
+		Circle1 secondCircle = new Circle1(-1, -1, 3);
+		boolean intersects;
+
+		System.out.println("Running test intersectTwo.");
+		intersects = circle1.intersects(secondCircle);
+
+		Assert.assertTrue(intersects == true);
+	}
+
+	//
+	// Equal distance two circles; the two circles meet but not intersect
+	//
+	@Test
+	public void meetTwo()
+	{
+		Circle1 secondCircle = new Circle1(-3, -2.5, 3);
+		boolean intersects;
+
+		System.out.println("Running test meetTwo.");
+		intersects = circle1.intersects(secondCircle);
+
+		Assert.assertFalse(intersects);
+	}
+
+	//
+	// Two circles do not meet; no intersection
+	//
+	@Test
+	public void apartTwo()
+	{
+		Circle1 secondCircle = new Circle1(-5, -5, 2);
+		boolean intersects;
+
+		System.out.println("Running apartTwo.");
+		intersects = circle1.intersects(secondCircle);
+
+		Assert.assertFalse(intersects);
+	}
+
 	/***
 	 * NOT USED public static void main(String args[]) { try { org.junit.runner.JUnitCore.runClasses(
 	 * java.lang.Class.forName("Circle1Test")); } catch (Exception e) { System.out.println("Exception:
