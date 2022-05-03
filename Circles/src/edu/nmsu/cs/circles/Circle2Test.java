@@ -71,7 +71,7 @@ public class Circle2Test {
 	@Test
 	public void meetTwo()
 	{
-		Circle2 secondCircle = new Circle2(-3, -2.5, 3);
+		Circle2 secondCircle = new Circle2(7, 2, 3);
 		boolean intersects;
 
 		System.out.println("Running test meetTwo.");
