@@ -104,6 +104,45 @@ public class Circle1Test
 		Assert.assertFalse(intersects);
 	}
 
+	//
+	// Test scaling by a factor less than 1
+	//
+	@Test
+	public void smallerScale()
+	{
+		double newScale;
+		double oldScale = circle1.radius;
+		System.out.println("Running test negativeScale.");
+		newScale = circle1.scale(0.5);
+		Assert.assertTrue(oldScale * 0.5 == newScale);
+	}
+
+	//
+	// Test scaling by a factor of 1
+	//
+	@Test
+	public void equalScale()
+	{
+		double newScale;
+		double oldScale = circle1.radius;
+		System.out.println("Running test equalScale.");
+		newScale = circle1.scale(1.0);
+		Assert.assertTrue(oldScale * 1.0 == newScale);
+	}
+
+	//
+	// Test scaling by a factor greater than 1
+	//
+	@Test
+	public void greaterScale()
+	{
+		double newScale;
+		double oldScale = circle1.radius;
+		System.out.println("Running test greaterScale.");
+		newScale = circle1.scale(3.5);
+		Assert.assertTrue(oldScale * 3.5 == newScale);
+	}
+
 	/***
 	 * NOT USED public static void main(String args[]) { try { org.junit.runner.JUnitCore.runClasses(
 	 * java.lang.Class.forName("Circle1Test")); } catch (Exception e) { System.out.println("Exception:
