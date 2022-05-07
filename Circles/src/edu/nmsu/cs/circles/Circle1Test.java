@@ -105,7 +105,7 @@ public class Circle1Test
 	}
 
 	//
-	// Test scaling by a factor less than 1
+	// Test scaling a circle down by a factor less than 1
 	//
 	@Test
 	public void smallerScale()
@@ -118,7 +118,7 @@ public class Circle1Test
 	}
 
 	//
-	// Test scaling by a factor of 1
+	// Test scaling by a factor of 1 (no scale)
 	//
 	@Test
 	public void equalScale()
@@ -131,7 +131,7 @@ public class Circle1Test
 	}
 
 	//
-	// Test scaling by a factor greater than 1
+	// Test scaling a circle up by a factor greater than 1
 	//
 	@Test
 	public void greaterScale()
